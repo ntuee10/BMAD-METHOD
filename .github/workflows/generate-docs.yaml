@@ -1,0 +1,147 @@
+name: Generate Documentation (PDF/EPUB/DOCX)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/comprehensive-user-guide.md'
+      - 'docs/CLAUDE-template.md'
+      - 'AGENTS.md'
+      - '.github/workflows/generate-docs.yaml'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      generate_all_formats:
+        description: 'Generate all formats (PDF, EPUB, DOCX)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  generate-documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex texlive-fonts-recommended texlive-fonts-extra
+          pandoc --version
+
+      - name: Create output directory
+        run: mkdir -p docs/output
+
+      - name: Generate PDF - Comprehensive User Guide
+        run: |
+          pandoc docs/comprehensive-user-guide.md \
+            -o docs/output/BMAD-METHOD-Comprehensive-Guide.pdf \
+            --toc --toc-depth=3 \
+            -V geometry:margin=1in \
+            -V documentclass=book \
+            -V fontsize=11pt \
+            -V linkcolor=blue \
+            --pdf-engine=xelatex \
+            --metadata title="BMAD-METHOD for Spec-Driven Programming" \
+            --metadata subtitle="A Comprehensive Guide for Junior Engineers" \
+            --metadata author="BMAD Development Team" \
+            --metadata date="$(date +'%B %Y')"
+
+      - name: Generate EPUB - Comprehensive User Guide
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.generate_all_formats == 'true' || github.event_name == 'push'
+        run: |
+          pandoc docs/comprehensive-user-guide.md \
+            -o docs/output/BMAD-METHOD-Comprehensive-Guide.epub \
+            --toc --toc-depth=3 \
+            --metadata title="BMAD-METHOD for Spec-Driven Programming" \
+            --metadata subtitle="A Comprehensive Guide for Junior Engineers" \
+            --metadata author="BMAD Development Team" \
+            --metadata date="$(date +'%B %Y')"
+
+      - name: Generate DOCX - Comprehensive User Guide
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.generate_all_formats == 'true' || github.event_name == 'push'
+        run: |
+          pandoc docs/comprehensive-user-guide.md \
+            -o docs/output/BMAD-METHOD-Comprehensive-Guide.docx \
+            --toc --toc-depth=3 \
+            --metadata title="BMAD-METHOD for Spec-Driven Programming" \
+            --metadata subtitle="A Comprehensive Guide for Junior Engineers" \
+            --metadata author="BMAD Development Team"
+
+      - name: Generate PDF - CLAUDE Integration Guide
+        run: |
+          pandoc docs/CLAUDE-template.md \
+            -o docs/output/BMAD-CLAUDE-Integration-Guide.pdf \
+            --toc --toc-depth=2 \
+            -V geometry:margin=1in \
+            -V linkcolor=blue \
+            --pdf-engine=xelatex \
+            --metadata title="BMAD-METHOD for Claude Code" \
+            --metadata author="BMAD Development Team"
+
+      - name: Generate PDF - AGENTS Reference
+        run: |
+          pandoc AGENTS.md \
+            -o docs/output/BMAD-AGENTS-Reference.pdf \
+            --toc --toc-depth=2 \
+            -V geometry:margin=1in \
+            -V linkcolor=blue \
+            --pdf-engine=xelatex \
+            --metadata title="BMAD-METHOD Agent Reference" \
+            --metadata subtitle="Universal Guide for All LLMs" \
+            --metadata author="BMAD Development Team"
+
+      - name: List generated files
+        run: |
+          echo "📚 Generated Documentation Files:"
+          ls -lh docs/output/
+
+      - name: Upload PDF artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmad-documentation-pdf-${{ github.sha }}
+          path: docs/output/*.pdf
+          retention-days: 90
+
+      - name: Upload all documentation formats
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.generate_all_formats == 'true' || github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: bmad-documentation-all-formats-${{ github.sha }}
+          path: docs/output/*
+          retention-days: 90
+
+      - name: Create Release (on main branch only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: docs-v${{ github.run_number }}
+          name: Documentation Release ${{ github.run_number }}
+          body: |
+            📚 **Automated Documentation Build**
+
+            Generated from commit: ${{ github.sha }}
+            Date: $(date +'%Y-%m-%d %H:%M:%S UTC')
+
+            **Included Files:**
+            - BMAD-METHOD-Comprehensive-Guide.pdf (Main User Guide)
+            - BMAD-METHOD-Comprehensive-Guide.epub (E-reader format)
+            - BMAD-METHOD-Comprehensive-Guide.docx (Word format)
+            - BMAD-CLAUDE-Integration-Guide.pdf (Claude Code Integration)
+            - BMAD-AGENTS-Reference.pdf (Universal Agent Reference)
+
+            **What's New:**
+            - Complete user guide with 3-way parallelism documentation
+            - Professional book formatting with table of contents
+            - Platform-specific integration guides
+            - Ready for distribution to junior engineers
+          files: |
+            docs/output/*.pdf
+            docs/output/*.epub
+            docs/output/*.docx
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

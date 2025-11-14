@@ -68,9 +68,73 @@ This directory contains the comprehensive user guide for BMAD-METHOD, designed a
 
 ## Generating the Book in Multiple Formats
 
-The book is currently in Markdown format. To generate PDF, EPUB, and Word formats, you'll need conversion tools.
+The book is currently in Markdown format. To generate PDF, EPUB, and Word formats, you have several options.
 
-### Option 1: Using Pandoc (Recommended)
+### Option 1: GitHub Actions (Automated - Recommended)
+
+**🤖 Fully automated PDF/EPUB/DOCX generation on every push!**
+
+A GitHub Actions workflow automatically generates all documentation formats when you push changes to the main branch or when documentation files are updated.
+
+#### How It Works
+
+1. **Automatic Generation**: Whenever you push changes to:
+   - `docs/comprehensive-user-guide.md`
+   - `docs/CLAUDE-template.md`
+   - `AGENTS.md`
+
+   The workflow automatically generates:
+   - `BMAD-METHOD-Comprehensive-Guide.pdf`
+   - `BMAD-METHOD-Comprehensive-Guide.epub`
+   - `BMAD-METHOD-Comprehensive-Guide.docx`
+   - `BMAD-CLAUDE-Integration-Guide.pdf`
+   - `BMAD-AGENTS-Reference.pdf`
+
+2. **Manual Trigger**: You can also manually trigger the workflow:
+   - Go to Actions tab on GitHub
+   - Select "Generate Documentation (PDF/EPUB/DOCX)"
+   - Click "Run workflow"
+   - Choose whether to generate all formats or just PDF
+
+3. **Download Results**:
+   - **From Artifacts**: Go to Actions → Click the workflow run → Download artifacts (available for 90 days)
+   - **From Releases**: Automatically creates a release with all files attached (on main branch only)
+
+#### Workflow Configuration
+
+The workflow is located at `.github/workflows/generate-docs.yaml` and includes:
+
+- ✅ Pandoc and LaTeX installation
+- ✅ Professional book formatting with table of contents
+- ✅ Metadata (title, author, date)
+- ✅ Multiple format generation (PDF, EPUB, DOCX)
+- ✅ Artifact upload (90-day retention)
+- ✅ Automatic releases on main branch
+- ✅ Manual trigger option
+
+#### Quick Links
+
+```bash
+# View workflow runs
+# https://github.com/YOUR-ORG/BMAD-METHOD/actions/workflows/generate-docs.yaml
+
+# Download latest artifacts
+# https://github.com/YOUR-ORG/BMAD-METHOD/actions → Select latest run → Artifacts
+
+# View releases
+# https://github.com/YOUR-ORG/BMAD-METHOD/releases
+```
+
+#### Benefits
+
+- 🚀 **Zero Setup**: No local Pandoc installation required
+- 🤖 **Fully Automated**: Generates on every documentation update
+- 📦 **Always Available**: Download from artifacts or releases
+- ✅ **Consistent Quality**: Same formatting every time
+- 🔄 **Version Controlled**: Each release tagged with build number
+- 💾 **Long Retention**: Artifacts kept for 90 days
+
+### Option 2: Using Pandoc Locally
 
 [Pandoc](https://pandoc.org/) is a universal document converter that can generate high-quality books in multiple formats.
 
@@ -158,7 +222,7 @@ pandoc docs/comprehensive-user-guide.md \
   -V date="January 2025"
 ```
 
-### Option 2: Using Online Converters
+### Option 3: Using Online Converters
 
 If you can't install Pandoc, use online services:
 
@@ -166,7 +230,7 @@ If you can't install Pandoc, use online services:
 - **EPUB**: [CloudConvert](https://cloudconvert.com/md-to-epub)
 - **Word**: [Markdown to Word](https://www.markdowntoword.com/)
 
-### Option 3: Using IDE Extensions
+### Option 4: Using IDE Extensions
 
 Many IDEs have Markdown preview and export capabilities:
 
