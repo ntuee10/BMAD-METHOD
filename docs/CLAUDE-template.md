@@ -454,6 +454,175 @@ While BMAD workflow is sequential within a story, you can parallelize across sto
 - Identify improvements for next stories
 - Knowledge transfer
 
+#### Strategy 4: Full 3-Way Parallelism (Maximum Velocity)
+
+```bash
+# Terminal 1: Active Development
+/bmad-agent-dev
+# Implementing epic-1.003-user-profile.md
+
+# Terminal 2: Story Pipeline
+/bmad-agent-sm
+*draft  # Preparing epic-1.004-settings.md
+
+# Terminal 3: Quality Assurance
+/bmad-agent-qa
+*review docs/stories/epic-1.002-dashboard.md
+# QA reviewing completed story
+```
+
+**Requirements for 3-Way Parallelism:**
+- Stories must be in different epics OR independent within same epic
+- Clear separation of concerns (no file conflicts)
+- Good architectural boundaries established
+- Sufficient test coverage for parallel development
+
+**Benefits:**
+- **3x throughput**: Three workstreams progressing simultaneously
+- Zero waiting time between story completion and next start
+- Continuous QA feedback loop
+- Pipeline always full
+
+**Example Timeline:**
+
+```
+Hour 1:
+├─ Dev: Implementing Story 3 (60% done)
+├─ SM: Drafting Story 4 (complete)
+└─ QA: Reviewing Story 2 (complete, gate: PASS)
+
+Hour 2:
+├─ Dev: Story 3 complete, starting Story 4 immediately
+├─ SM: Drafting Story 5 (complete)
+└─ QA: Reviewing Story 3 (in progress)
+
+Hour 3:
+├─ Dev: Implementing Story 4 (80% done)
+├─ SM: Drafting Story 6 (complete)
+└─ QA: Story 3 review complete (gate: CONCERNS - minor improvements)
+
+Result: 3 stories reviewed, 1.5 stories implemented, 3 stories drafted in 3 hours
+Without parallelism: 1 story complete in 3 hours
+Speedup: ~2.5x effective velocity
+```
+
+#### Strategy 5: Cross-Epic Parallelism (Advanced)
+
+For maximum throughput with multiple independent epics:
+
+```bash
+# Terminal 1: Epic 1 (Authentication)
+/bmad-agent-dev
+# Implementing epic-1.004-oauth-integration.md
+
+# Terminal 2: Epic 2 (Dashboard)
+/bmad-agent-dev
+# Implementing epic-2.003-widget-system.md
+
+# Terminal 3: Epic 3 (Settings)
+/bmad-agent-dev
+# Implementing epic-3.001-user-preferences.md
+```
+
+**Requirements:**
+- Epics must be completely independent (no shared files)
+- Separate feature branches for each epic
+- Clear integration points defined in architecture
+- Merge conflicts avoided through good separation
+
+**When to Use:**
+- Multiple developers on team (each takes a terminal/epic)
+- Solo developer with multiple Claude Code instances
+- Long-running features that can be parallelized
+- Well-defined API boundaries between epics
+
+**Benefits:**
+- Linear scaling with number of parallel streams
+- Multiple features delivered simultaneously
+- Reduced time-to-market for complete feature sets
+
+#### Strategy 6: Pipeline Optimization (3-Stage Pipeline)
+
+Optimize the entire development pipeline:
+
+```bash
+# Stage 1: Planning (Terminal 1)
+/bmad-agent-sm
+*draft  # Creates epic-1.005
+*draft  # Creates epic-1.006
+*draft  # Creates epic-2.004
+
+# Stage 2: Implementation (Terminal 2)
+/bmad-agent-dev
+# Implements epic-1.003 (from Stage 1 backlog)
+# Implements epic-1.004 (from Stage 1 backlog)
+
+# Stage 3: Quality (Terminal 3)
+/bmad-agent-qa
+*review epic-1.001  # From Stage 2 completed
+*review epic-1.002  # From Stage 2 completed
+```
+
+**Pipeline Flow:**
+
+```
+Backlog → Planning (SM) → Ready for Dev → Implementation (Dev) → Ready for QA → Review (QA) → Done
+
+Terminal 1 (SM):   [Plan] → [Plan] → [Plan] → ...
+                      ↓
+Terminal 2 (Dev):      [Implement] → [Implement] → [Implement] → ...
+                                       ↓
+Terminal 3 (QA):                        [Review] → [Review] → [Review] → ...
+```
+
+**Throughput Calculation:**
+- SM drafts 3 stories/hour
+- Dev implements 1 story/hour
+- QA reviews 2 stories/hour
+
+**Balanced Pipeline:** Run SM for 20 min/hour, Dev continuously, QA for 30 min/hour
+
+### Advanced Parallelism: Claude Code Multi-Instance
+
+For solo developers wanting maximum velocity:
+
+#### Option 1: Multiple Claude Code Windows
+
+```bash
+# Window 1: Primary Development
+code /path/to/project
+# Use /bmad-agent-dev for main development
+
+# Window 2: Story Preparation
+code /path/to/project
+# Use /bmad-agent-sm for story creation
+
+# Window 3: Quality Assurance
+code /path/to/project
+# Use /bmad-agent-qa for reviews
+```
+
+#### Option 2: Multiple Project Clones
+
+```bash
+# Terminal 1: Clone for dev
+git clone repo.git project-dev
+cd project-dev && git checkout -b feature/epic-1
+code .
+# Use dev agent
+
+# Terminal 2: Clone for SM
+git clone repo.git project-sm
+cd project-sm && git checkout main
+code .
+# Use SM agent to draft stories
+
+# Terminal 3: Original for QA
+cd project
+code .
+# Use QA agent for reviews
+```
+
 ### Speed Optimization Tips
 
 #### 1. Batch Story Creation
